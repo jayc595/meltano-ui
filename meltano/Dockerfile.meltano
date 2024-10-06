@@ -1,0 +1,20 @@
+# Use the official Python image
+FROM python:3.9-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install Meltano
+RUN pip install meltano
+
+# Copy the Meltano project files from the host to the container
+COPY . /app
+
+# Install project-specific Meltano dependencies (e.g., taps, targets)
+RUN meltano install || true
+
+# Expose Meltano UI port (default is 5000)
+EXPOSE 5000
+
+# Default command to run the Meltano UI
+CMD ["meltano", "ui"]

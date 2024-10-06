@@ -1,0 +1,21 @@
+version: '3'
+services:
+  meltano:
+    build:
+      context: ./meltano
+      dockerfile: Dockerfile.meltano
+    ports:
+      - "5000:5000"  # This will map your local port 5000 to the container's port 5000
+    volumes:
+      - ./meltano:/app
+    command: meltano init test_project  # Change to meltano install for testing
+
+  meltano-ui:
+    build:
+      context: ./meltano-ui
+      dockerfile: Dockerfile.meltano-ui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./meltano-ui:/usr/src/app
+    command: npm run dev
