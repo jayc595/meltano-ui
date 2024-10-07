@@ -18,4 +18,6 @@ services:
       - "3000:3000"
     volumes:
       - ./meltano-ui:/usr/src/app
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Enable polling for hot reloading  
     command: npm run dev

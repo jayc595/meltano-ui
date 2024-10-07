@@ -4,15 +4,15 @@ FROM node:20-alpine
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy the package.json and install dependencies
+# Copy only the package.json and package-lock.json first, then install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the Next.js app files from the host to the container
-COPY . .
-
 # Expose port 3000 for Next.js
 EXPOSE 3000
+
+# Enable Chokidar polling to detect file changes in Docker
+ENV CHOKIDAR_USEPOLLING=true
 
 # Default command to run the Next.js development server
 CMD ["npm", "run", "dev"]
