@@ -25,6 +25,7 @@ export const CreatePipelineModal = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    //@TODO: Handle creation of meltano project.
     toast.success("Pipeline created successfully");
     handleClose(); // Close the modal after submission
   };
@@ -54,7 +55,7 @@ export const CreatePipelineModal = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Pipelines are spaces where data extraction and loading configurations are managed.
+          Give your Meltano project a meaningful name. Pipelines facilitate the seamless extraction and loading of data, enabling efficient data integration and analysis.
           </p>
           <div className="flex justify-end">
             <Button disabled={false} type="submit">
