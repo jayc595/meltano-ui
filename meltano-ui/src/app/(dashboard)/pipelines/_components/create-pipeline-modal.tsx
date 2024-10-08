@@ -23,12 +23,35 @@ export const CreatePipelineModal = () => {
     setOpen(false); // Close the modal
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //@TODO: Handle creation of meltano project.
-    toast.success("Pipeline created successfully");
-    handleClose(); // Close the modal after submission
-  };
+
+    // Call the API to create a new Meltano project
+    try {
+        const response = await fetch('/api/createPipeline', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ projectName: name }), // Send the project name
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create pipeline');
+        }
+
+        const data = await response.json();
+        toast.success(data.message); // Show success message
+        handleClose(); // Close the modal after submission
+    } catch (error) {
+        // Check if the error is an instance of Error
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error(errorMessage);
+        toast.error("Failed to create pipeline: " + errorMessage);
+    }
+};
+
+  
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
