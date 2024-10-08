@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Hash } from "lucide-react";
+import { FolderGit2 } from "lucide-react";
 import { toast } from "sonner";
 import { useCreatePipelineModal } from "../use-create-pipeline-modal";
 
@@ -38,7 +38,7 @@ export const CreatePipelineModal = () => {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
-            <Hash className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <FolderGit2 className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input
               value={name}
               disabled={false}
@@ -47,7 +47,7 @@ export const CreatePipelineModal = () => {
               autoFocus
               minLength={3}
               maxLength={maxCharLength}
-              placeholder="e.g general"
+              placeholder="e.g google-analytics-to-postgres"
               className="pl-8 pr-8"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
