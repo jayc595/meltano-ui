@@ -21,7 +21,7 @@ COPY . .
 RUN meltano install || true
 
 # Make directories
-RUN mkdir projects
+# RUN mkdir projects
 
 
 # Expose Meltano UI port (default is 5000)

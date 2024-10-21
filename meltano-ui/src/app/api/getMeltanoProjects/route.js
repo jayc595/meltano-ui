@@ -14,6 +14,7 @@ export async function GET(req) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
       },
       body: JSON.stringify({ command }),
     });

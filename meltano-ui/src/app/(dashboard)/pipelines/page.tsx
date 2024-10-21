@@ -27,6 +27,7 @@ const Pipelines = (props: Props) => {
         if (response.ok) {
           setProjects(data.projects);
         } else {
+          setProjects([]);
           throw new Error(data.error);
         }
       } catch (err) {
@@ -46,7 +47,7 @@ const Pipelines = (props: Props) => {
     <div className="flex-1 h-[calc(100%-80px)] p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5 mt-8 pb-10">
         <NewProjectButton onNew={() => {setOpen(true);  }} projId={"1234"} />
-        {projects.length > 0 ? (
+        {projects?.length > 0 ? (
           projects.map((project, index) => (
             <PipelineCard
               key={index}
