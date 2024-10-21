@@ -1,23 +1,29 @@
-version: '3'
+version: '3.8'
+
 services:
   meltano:
+    container_name: meltano
     build:
       context: ./meltano
       dockerfile: Dockerfile.meltano
     ports:
-      - "5000:5000"  # This will map your local port 5000 to the container's port 5000
+      - "5000:5000"  # Expose the API port for Meltano
     volumes:
-      - ./meltano:/app
-    command: meltano init test_project  # Change to meltano install for testing
+      - ./meltano:/app/meltano  # Mount the Meltano project directory
+    command: python meltano-api.py  # Start the API inside this container
 
   meltano-ui:
+    container_name: meltano-ui
     build:
       context: ./meltano-ui
       dockerfile: Dockerfile.meltano-ui
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Expose the UI port
     volumes:
       - ./meltano-ui:/usr/src/app
+    depends_on:
+      - meltano  # Ensure Meltano API starts before the UI
     environment:
-      - CHOKIDAR_USEPOLLING=true  # Enable polling for hot reloading  
-    command: npm run dev
+      - CHOKIDAR_USEPOLLING=true  # Enable polling for hot reloading
+      - MELTANO_API_URL=http://meltano:5000  # Correct URL for API
+    command: npm run dev  # Start the UI in development mode

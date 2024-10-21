@@ -1,38 +1,50 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+// src/app/api/projects/route.js
+
+import { NextResponse } from 'next/server';
 
 export async function GET(req) {
+  const meltanoApiUrl = 'http://meltano:5000/api/execute-command'; // Use the Meltano API for executing commands
+  
   try {
-    
-    // Define the path to the meltano projects folder
-    const meltanoProjectsPath = path.join('/app/meltano');
+    // Define the command to list project directories
+    const command = 'if [ "$(ls -A /app/meltano/projects)" ]; then ls -l /app/meltano/projects; else echo "No projects found"; fi';
 
-    // Read the directory contents
-    const directories = await fs.readdir(meltanoProjectsPath, { withFileTypes: true });
-
-    // Fetch name and creation date for each directory
-    const projectDirectories = await Promise.all(
-      directories
-        .filter(dirent => dirent.isDirectory())
-        .map(async dirent => {
-          const fullPath = path.join(meltanoProjectsPath, dirent.name);
-          const stats = await fs.stat(fullPath); // Get directory metadata
-          return {
-            name: dirent.name,
-            createdAt: stats.birthtime, // Use birthtime for creation date
-          };
-        })
-    );
-
-    // Return the directory names and creation dates as JSON
-    return new Response(JSON.stringify({ projects: projectDirectories }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    // Send a request to the Meltano API to execute the command
+    const response = await fetch(meltanoApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ command }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return NextResponse.json({ error: errorData.message || 'Failed to fetch project directories' }, { status: response.status });
+    }
+
+    const { message } = await response.json();
+
+    // Split the output into lines and remove the first line
+    const outputLines = message.trim().split('\n');
+
+    // Check if the output contains the "No projects found" message
+    if (outputLines.length === 1 && outputLines[0].includes("No projects found")) {
+      return NextResponse.json({ projects: [] }, { status: 200 });
+    }
+
+    // Process the remaining lines (skipping the first one)
+    const projectDirectories = outputLines.slice(1).map(line => {
+      const parts = line.split(/\s+/); // Split by whitespace
+      const name = parts[parts.length - 1]; // Get the last part as the name
+      const createdAt = new Date(); // Create a new date object for now
+
+      return { name, createdAt }; // Assuming creation date is current; adjust logic as needed
+    });
+
+    return NextResponse.json({ projects: projectDirectories }, { status: 200 });
   } catch (error) {
-    console.error('Error reading directory:', error);
-    return new Response(JSON.stringify({ error: 'Failed to read directory' }), {
-      status: 500,
-    });
+    console.error('Error fetching projects:', error);
+    return NextResponse.json({ error: 'Failed to fetch projects. An error occurred.' }, { status: 500 });
   }
 }

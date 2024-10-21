@@ -1,10 +1,6 @@
 // src/app/api/createPipeline/route.js
 
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import util from 'util';
-
-const execPromise = util.promisify(exec);
 
 export async function POST(req) {
   const { projectName } = await req.json();
@@ -13,21 +9,32 @@ export async function POST(req) {
     return NextResponse.json({ message: 'Project name is required.' }, { status: 400 });
   }
 
-  const meltanoPath = path.join('/app/meltano');
-  
+  const meltanoApiUrl = 'http://meltano:5000/api/execute-command'; // Meltano API endpoint
+
+  // Constructing the command payload to send to the Meltano API
+  const commandPayload = {
+    command: `cd projects && meltano init ${projectName}`
+  };
+
   try {
-    // Execute the Meltano command to create a new project
-    const { stdout, stderr } = await execPromise(`cd ${meltanoPath} && meltano init ${projectName}`);
-    
-    if (stderr) {
-      console.error(`Error: ${stderr}`);
-      return NextResponse.json({ message: `Failed to create pipeline: ${stderr}` }, { status: 500 });
+    // Send a request to the Meltano API
+    const response = await fetch(meltanoApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(commandPayload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json({ message: `Failed to create pipeline: ${data.message}` }, { status: response.status });
     }
 
-    console.log(stdout);
     return NextResponse.json({ message: `Pipeline '${projectName}' created successfully!` }, { status: 200 });
   } catch (error) {
     console.error('Error executing command:', error);
-    return NextResponse.json({ message: 'Failed to create pipeline. An error occurred.' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to create pipeline. An error occurred.', error: error.message }, { status: 500 });
   }
 }

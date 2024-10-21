@@ -2,19 +2,30 @@
 FROM python:3.9-slim
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/meltano
+
+# Install system dependencies (including curl)
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Meltano
-RUN pip install meltano
+RUN pip install meltano flask
 
 # Copy the Meltano project files from the host to the container
-COPY . /app
+COPY . .
 
 # Install project-specific Meltano dependencies (e.g., taps, targets)
 RUN meltano install || true
+
+# Make directories
+RUN mkdir projects
+
 
 # Expose Meltano UI port (default is 5000)
 EXPOSE 5000
 
 # Default command to run the Meltano UI
-CMD ["meltano", "ui"]
+CMD ["python", "meltano-api.py"]
